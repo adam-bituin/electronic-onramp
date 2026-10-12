@@ -13,9 +13,9 @@
   const L10N = window.EOR_L10N || {};
   const UI = Object.assign({
     menuOpen: 'Open menu', menuClose: 'Close menu',
-    none: 'No services chosen yet',
-    errService: 'Choose at least one service in step 1.',
-    errContact: 'Please add your name and WhatsApp number in step 3.',
+    none: 'No services selected',
+    errService: 'Select at least one service.',
+    errContact: 'Please add your name and WhatsApp number.',
     wa: { title: '*New quote request from the Electronic On-Ramp website*', name: 'Name', business: 'Company', phone: 'WhatsApp',
           link: 'Email or website', about: 'What we do' }
   }, L10N.ui);
@@ -247,7 +247,7 @@
   refresh();
 
   /* Subtle reveal on scroll */
-  const targets = $$('.sec-head, .svc, .sol, .step, .tile, .facts, .badges, .plan-block, .contact-tile, .faq details');
+  const targets = $$('.sec-head, .feature, .catalog > div, .steps li, .about-copy, .facts, .plan-block, .summary, .faq, .contact-grid');
   if ('IntersectionObserver' in window && !reduceMotion) {
     targets.forEach(n => n.classList.add('reveal'));
     const io = new IntersectionObserver(entries => entries.forEach(en => {
