@@ -13,6 +13,7 @@
   const L10N = window.EOR_L10N || {};
   const UI = Object.assign({
     menuOpen: 'Open menu', menuClose: 'Close menu',
+    demoPause: 'Pause animation', demoPlay: 'Play animation',
     none: 'No services selected',
     errService: 'Select at least one service.',
     errContact: 'Please add your name and WhatsApp number.',
@@ -256,6 +257,42 @@
   });
 
   refresh();
+
+  /* Hero demo: the orange bar under the active tab times each scene; when it finishes, the next tab plays.
+     Pauses on request, while scrolled off-screen, and while the browser tab is hidden. With reduced motion
+     nothing plays: each tab shows its finished scene. */
+  const demo = $('[data-demo]');
+  if (demo) {
+    const tabs = $$('[data-tab]', demo), scenes = $$('[data-scene]', demo), caps = $$('[data-cap]', demo);
+    const pause = $('.demo-pause', demo);
+    let current = 0;
+    const show = i => {
+      current = i;
+      tabs.forEach((t, k) => { t.setAttribute('aria-pressed', k === i); t.classList.remove('run'); });
+      scenes.forEach((s, k) => { s.classList.toggle('on', k === i); s.classList.remove('play'); });
+      caps.forEach((c, k) => { c.hidden = k !== i; });
+      if (reduceMotion) return;
+      void demo.offsetWidth; /* restart the CSS animations */
+      scenes[i].classList.add('play');
+      tabs[i].classList.add('run');
+    };
+    tabs.forEach((t, k) => {
+      t.addEventListener('click', () => show(k));
+      $('i', t).addEventListener('animationend', () => { if (k === current) show((k + 1) % tabs.length); });
+    });
+    pause.addEventListener('click', () => {
+      const paused = demo.classList.toggle('paused');
+      pause.setAttribute('aria-pressed', paused);
+      pause.setAttribute('aria-label', paused ? UI.demoPlay : UI.demoPause);
+    });
+    const offscreen = { view: false, tab: false };
+    const sync = () => demo.classList.toggle('offscreen', offscreen.view || offscreen.tab);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([en]) => { offscreen.view = !en.isIntersecting; sync(); }).observe(demo);
+    }
+    document.addEventListener('visibilitychange', () => { offscreen.tab = document.hidden; sync(); });
+    show(0);
+  }
 
   /* Subtle reveal on scroll */
   const targets = $$('.sec-head, .feature, .catalog > div, .steps li, .about-copy, .facts, .plan-block, .summary, .faq, .contact-grid');

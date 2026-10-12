@@ -124,65 +124,163 @@ button, input, textarea { font: inherit; color: inherit; }
 .hero-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px 32px; margin-top: 40px; }
 .hero-cta .link-more { font-size: 17px; }
 
-/* Hero stage: a photo with product cards floating in front of it. Cards drift slowly; all motion stops
-   under reduced motion. Positions use inline-start/end so the Arabic page mirrors on its own. */
+/* Hero demo: three short scenes (Sage, ZATCA, Acronis) in one white window on a navy panel.
+   Every element's resting state is its finished frame; the timeline lives in animations that only run
+   under .play, using `from` keyframes. So reduced motion (no .play) simply shows each finished scene.
+   The orange bar under the active tab times the scene; when it ends, main.js moves to the next tab. */
 .hero-stage {
-  position: relative; width: min(1120px, 100% - 32px); margin: 64px auto 0; aspect-ratio: 16 / 8.4;
-  border-radius: 28px; overflow: hidden; background: var(--navy); isolation: isolate;
+  --scene: 6.5s; --nudge: -12px;
+  position: relative; isolation: isolate; width: min(1120px, 100% - 32px); margin: 64px auto 0; padding: 64px 24px 36px;
+  border-radius: 28px; background: var(--navy); color: var(--on-navy); overflow: hidden;
 }
-.hero-stage::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(31, 36, 66, .15), rgba(31, 36, 66, .6)); }
-.hero-photo { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; animation: drift 40s ease-in-out infinite alternate; }
-@keyframes drift { to { transform: scale(1.08) translate(-1.5%, -1%); } }
-
-.hero-card {
-  position: absolute; width: 280px; padding: 18px 20px; border-radius: 18px; text-align: start;
-  background: rgba(255, 255, 255, .94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 1px 2px rgba(31, 36, 66, .12), 0 24px 48px -12px rgba(15, 18, 38, .45);
-  font-size: 13px; line-height: 1.4; color: var(--ink-2);
-  animation: card-in .9s cubic-bezier(.2, .7, .2, 1) both, bob 8s ease-in-out infinite;
+[dir="rtl"] .hero-stage { --nudge: 12px; }
+.hero-stage::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px) center / 44px 44px,
+              linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px) center / 44px 44px;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
 }
-.hero-card p { margin: 0; }
-.hc-invoice { inset-inline-start: 6%; top: 14%; animation-delay: .15s, 1.2s; }
-.hc-zatca { inset-inline-start: 50%; translate: -50% 0; bottom: 9%; width: 300px; animation-delay: .3s, 2.5s; animation-duration: .9s, 9s; }
-[dir="rtl"] .hc-zatca { translate: 50% 0; }
-.hc-backup { inset-inline-end: 6%; top: 22%; width: 250px; animation-delay: .45s, 4s; animation-duration: .9s, 10s; }
-@keyframes card-in { from { opacity: 0; transform: translateY(28px) scale(.97); } }
-@keyframes bob { 50% { transform: translateY(-8px); } }
-
-.hc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 12px; font-weight: 600; color: var(--muted); }
-.hc-tag { padding: 3px 9px; border-radius: 99px; background: #E6F4EC; color: #17663F; font-weight: 600; }
-.hero-card .hc-amount { margin-top: 2px; font-size: 26px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
-:lang(ar) .hero-card .hc-amount { letter-spacing: 0; }
-[dir="rtl"] .hc-amount[dir="ltr"] { text-align: right; }
-.hero-card .hc-row { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
-.hero-card .hc-meta { margin-top: 6px; font-size: 12px; color: var(--muted); }
-.hc-zbody { display: flex; align-items: center; gap: 16px; }
-.hc-qr { width: 64px; height: 64px; flex: none; fill: var(--ink); }
-.hc-zbody .hc-label { font-weight: 600; color: var(--ink); }
-.hc-live { width: 8px; height: 8px; border-radius: 50%; background: #23A55A; box-shadow: 0 0 0 0 rgba(35, 165, 90, .5); animation: live 2.4s ease-out infinite; }
-@keyframes live { 70%, 100% { box-shadow: 0 0 0 8px rgba(35, 165, 90, 0); } }
-.hc-bar { height: 6px; margin-top: 12px; border-radius: 99px; background: var(--line); overflow: hidden; }
-.hc-bar span { display: block; height: 100%; border-radius: inherit; background: var(--orange); transform-origin: left; animation: fill 1.6s cubic-bezier(.2, .7, .2, 1) .8s both; }
-[dir="rtl"] .hc-bar span { transform-origin: right; }
-@keyframes fill { from { transform: scaleX(0); } }
-
-@media (max-width: 899px) {
-  .hero-stage { aspect-ratio: 4 / 3; margin-top: 48px; border-radius: 22px; }
-  .hero-card { width: 230px; padding: 14px 16px; font-size: 12px; }
-  .hero-card .hc-amount { font-size: 21px; }
-  .hc-invoice { inset-inline-start: 4%; top: 6%; }
-  .hc-backup { inset-inline-end: 4%; top: 32%; width: 210px; }
-  .hc-zatca { bottom: 5%; width: 250px; }
-  .hc-qr { width: 52px; height: 52px; }
+.demo-window {
+  display: grid; width: min(560px, 100%); margin-inline: auto; padding: 28px; border-radius: 20px;
+  background: var(--bg); color: var(--ink-2); text-align: start; font-size: 14px; line-height: 1.45;
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, .55);
 }
-@media (max-width: 559px) {
-  .hero-stage { aspect-ratio: 3 / 4; }
-  .hero-card { width: 72%; }
-  .hc-backup { top: 40%; width: 66%; }
-  .hc-zatca { width: 80%; }
+.demo-window p, .demo-window ul { margin: 0; padding: 0; list-style: none; }
+.demo-scene { grid-area: 1 / 1; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transition: opacity .35s, visibility .35s; }
+.demo-scene.on { opacity: 1; visibility: visible; }
+
+.ds-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.ds-app { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ds-title { margin-top: 2px; font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+:lang(ar) .ds-title { letter-spacing: 0; }
+.ds-sub { font-size: 13px; color: var(--muted); }
+.ds-badge { display: grid; flex: none; }
+.ds-badge > span { grid-area: 1 / 1; justify-self: end; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.b-draft { background: var(--bg-soft); color: var(--muted); opacity: 0; }
+.b-done { background: #E6F4EC; color: #17663F; }
+.b-done .icon { width: 14px; height: 14px; stroke-width: 2.6; }
+
+/* Scene 1: Sage invoice */
+.inv-lines li, .inv-sums p { display: flex; justify-content: space-between; gap: 16px; }
+.inv-lines li { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--ink); }
+.inv-sums { display: grid; gap: 6px; padding-top: 12px; font-size: 13px; color: var(--muted); }
+.inv-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.inv-total { display: grid; font-size: 12px; color: var(--muted); }
+.inv-total strong { font-size: 24px; color: var(--ink); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.ds-btn { padding: 9px 16px; border-radius: 99px; background: var(--orange); color: var(--on-orange); font-size: 13px; font-weight: 600; opacity: .4; white-space: nowrap; }
+
+/* Scene 2: ZATCA clearance */
+.z-flow { display: flex; align-items: center; }
+.z-doc, .z-node { flex: 0 0 40%; padding: 16px; border: 1px solid var(--line); border-radius: 14px; }
+.z-doc { background: var(--bg-soft); }
+.z-amt { margin-top: 2px; font-size: 16px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.z-lines { display: grid; gap: 6px; margin-top: 14px; }
+.z-lines i { height: 6px; border-radius: 3px; background: var(--line-strong); opacity: .6; }
+.z-lines i:nth-child(2) { width: 80%; }
+.z-lines i:nth-child(3) { width: 55%; }
+.z-link { position: relative; flex: 1; height: 8px; margin-inline: 8px; }
+.z-line { position: absolute; inset: 3px 0 auto; height: 2px; background: repeating-linear-gradient(90deg, var(--line-strong) 0 6px, transparent 6px 10px); transform-origin: left; }
+[dir="rtl"] .z-line { transform-origin: right; }
+.z-dot { position: absolute; top: 0; inset-inline-end: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); opacity: 0; }
+.z-node { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.z-node .ds-badge > span { justify-self: center; }
+.z-qr { width: 84px; height: 84px; fill: var(--ink); }
+.z-flow { margin-block: auto; }
+.z-steps { display: flex; justify-content: space-between; gap: 12px; margin: 20px 0 0; padding: 16px 0 0; border-top: 1px solid var(--line); list-style: none; font-size: 13px; color: var(--ink); }
+.z-steps li { display: flex; align-items: center; gap: 6px; }
+.z-steps .icon { width: 16px; height: 16px; padding: 2px; border-radius: 50%; background: #23A55A; color: #fff; stroke-width: 3.2; }
+
+/* Scene 3: Acronis protection */
+.a-sum { display: flex; align-items: center; gap: 14px; }
+.a-shield { width: 44px; height: 44px; flex: none; fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
+.a-count::before { counter-reset: n var(--n); content: counter(n); }
+@property --n { syntax: "<integer>"; inherits: true; initial-value: 24; }
+.a-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+.a-grid li { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: 10px; background: #E6F4EC; color: #17663F; }
+.a-grid .icon { width: 55%; height: 55%; }
+.a-grid .a-tick { position: absolute; top: 3px; inset-inline-end: 3px; width: 13px; height: 13px; padding: 2px; border-radius: 50%; background: #23A55A; color: #fff; stroke-width: 3.4; }
+.a-foot { margin-top: auto !important; padding-top: 16px; }
+
+/* Timeline (runs only while a scene has .play) */
+.play .ds-head { animation: rise .5s .1s both; }
+.s-sage.play .inv-lines li { animation: slide .45s calc(.6s + var(--i) * .35s) both; }
+.s-sage.play .inv-sums { animation: rise .45s 1.85s both; }
+.s-sage.play .inv-foot { animation: rise .5s 2.35s both; }
+.s-sage.play .ds-btn { animation: press .8s 3s both; }
+.s-sage.play .b-draft { animation: fade-out .25s 3.5s both; }
+.s-sage.play .b-done { animation: pop .4s 3.55s both; }
+.s-zatca.play .z-doc { animation: rise .5s .3s both; }
+.s-zatca.play .z-line { animation: draw .6s .9s both; }
+.s-zatca.play .z-dot { animation: travel .9s 1.4s ease-in-out both; }
+.s-zatca.play .z-node { animation: rise .5s 1.9s both; }
+.s-zatca.play .z-qr { animation: qr 1.2s steps(7) 2.3s both; }
+.s-zatca.play .b-draft { animation: fade-out .25s 3.7s both; }
+.s-zatca.play .b-done { animation: pop .4s 3.75s both; }
+.s-zatca.play .z-time { animation: rise .4s 4s both; }
+.s-zatca.play .z-steps li { animation: dim .3s var(--t) both; }
+.s-zatca.play .z-steps .icon { animation: pop .3s var(--t) both; }
+.s-acronis.play .a-shield { animation: dash 1.2s .2s ease-out both; }
+.s-acronis.play .a-grid { animation: rise .5s .5s both; }
+.s-acronis.play .a-grid li { animation: tile-on .35s calc(1.3s + var(--i) * 80ms) both; }
+.s-acronis.play .a-tick { animation: pop .3s calc(1.35s + var(--i) * 80ms) both; }
+.s-acronis.play .a-count { animation: count 1.9s 1.3s linear both; }
+.s-acronis.play .a-foot { animation: rise .4s 3.7s both; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes slide { from { opacity: 0; transform: translateX(var(--nudge)); } }
+@keyframes press { from { opacity: 1; } 45% { opacity: 1; transform: scale(.92); } 75% { opacity: 1; transform: none; } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dim { from { opacity: .35; } }
+@keyframes pop { from { opacity: 0; transform: scale(.7); } }
+@keyframes draw { from { transform: scaleX(0); } }
+@keyframes travel { from { inset-inline-end: calc(100% - 8px); opacity: 1; } 85% { opacity: 1; } }
+@keyframes qr { from { clip-path: inset(0 0 100% 0); } }
+@keyframes dash { from { stroke-dashoffset: 1; } }
+@keyframes tile-on { from { background: var(--bg-soft); color: var(--line-strong); } }
+@keyframes count { from { --n: 0; } to { --n: 24; } }
+
+/* Controls */
+.demo-controls { display: flex; justify-content: center; margin-top: 28px; }
+.demo-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 99px; background: rgba(255, 255, 255, .08); }
+.demo-tabs button {
+  position: relative; padding: 9px 18px; border: 0; border-radius: 99px; background: transparent; cursor: pointer;
+  color: var(--on-navy-2); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s;
+}
+.demo-tabs button:hover { color: var(--on-navy); }
+.demo-tabs button[aria-pressed="true"] { background: rgba(255, 255, 255, .14); color: var(--on-navy); }
+.demo-tabs button i { position: absolute; inset-inline: 18px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--orange); transform: scaleX(0); transform-origin: left; }
+[dir="rtl"] .demo-tabs button i { transform-origin: right; }
+.demo-tabs button.run i { animation: progress var(--scene) linear both; }
+@keyframes progress { to { transform: scaleX(1); } }
+.demo-pause {
+  position: absolute; top: 16px; inset-inline-end: 16px; display: grid; place-items: center; width: 36px; height: 36px;
+  border: 0; border-radius: 50%; background: rgba(255, 255, 255, .08); color: var(--on-navy); cursor: pointer;
+}
+.demo-pause:hover { background: rgba(255, 255, 255, .16); }
+.demo-pause .icon { width: 16px; height: 16px; stroke-width: 2.4; }
+.demo-pause .i-play, .demo-pause[aria-pressed="true"] .i-pause { display: none; }
+.demo-pause[aria-pressed="true"] .i-play { display: block; }
+.demo-tabs button:focus-visible, .demo-pause:focus-visible { outline: 2px solid var(--on-navy); outline-offset: 2px; }
+.demo-cap { max-width: 32em; margin: 14px auto 0; color: var(--on-navy-2); font-size: 15px; text-wrap: balance; }
+.hero-stage:is(.paused, .offscreen) * { animation-play-state: paused !important; }
+
+@media (max-width: 599px) {
+  .hero-stage { margin-top: 48px; padding: 56px 12px 24px; border-radius: 22px; }
+  .demo-window { padding: 20px 18px; font-size: 13px; }
+  .ds-title { font-size: 17px; }
+  .inv-total strong { font-size: 20px; }
+  .z-doc, .z-node { flex-basis: 42%; padding: 12px; }
+  .z-amt { font-size: 13px; }
+  .z-qr { width: 64px; height: 64px; }
+  .a-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .z-steps { flex-direction: column; gap: 8px; }
+  .demo-tabs button { padding: 8px 14px; font-size: 13px; }
+  .demo-tabs button i { inset-inline: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-photo, .hero-card, .hc-live, .hc-bar span { animation: none; }
+  .demo-scene { transition: none; }
+  .demo-tabs button i, .demo-pause { display: none; }
 }
 
 /* ── Partner logo marquee ── */
