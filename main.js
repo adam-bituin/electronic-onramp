@@ -21,6 +21,17 @@
   }, L10N.ui);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* Both pages opt out of browser translation. If someone translates anyway (Google Translate rewrites
+     <html lang> and adds a translated-ltr/rtl class), send them to the real page in that language,
+     so they never see English text in the right-to-left Arabic layout or the reverse. */
+  const root = document.documentElement, pageLang = root.lang;
+  new MutationObserver(() => {
+    const to = root.lang.slice(0, 2);
+    if (to === pageLang || !/translated-(ltr|rtl)/.test(root.className)) return;
+    if (to === 'en' && pageLang === 'ar') location.replace('/' + location.hash);
+    else if (to === 'ar' && pageLang === 'en') location.replace('/ar/' + location.hash);
+  }).observe(root, { attributes: true, attributeFilter: ['lang', 'class'] });
+
   $('#year').textContent = new Date().getFullYear();
   $$('[data-wa]').forEach(a => { a.href = `https://wa.me/${WHATSAPP}`; });
 
