@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://electronic-onramp.vercel.app/sitemap.xml
