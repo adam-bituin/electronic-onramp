@@ -36,13 +36,42 @@
   $('#year').textContent = new Date().getFullYear();
   $$('[data-wa]').forEach(a => { a.href = `https://wa.me/${WHATSAPP}`; });
 
-  /* Header gains a border and shadow once the page scrolls */
-  const header = $('.site-header');
-  const onScroll = () => header.classList.toggle('scrolled', scrollY > 8);
+  /* Header: the capsule tightens and lifts once the page scrolls, and the pill behind the links
+     follows the section in view. A section is current once its top passes 40% of the viewport;
+     sections without a nav link (the quote form) leave no pill showing. */
+  const header = $('.site-header'), nav = $('#nav'), ind = $('.nav-ind', nav);
+  const sections = $$('main section[id]');
+  const linkFor = id => $(`a[href="#${id}"]:not(.nav-cta)`, nav);
+  let current = null;
+  const moveInd = () => {
+    if (!current || !ind.offsetParent) { ind.classList.remove('on'); return; }
+    ind.style.setProperty('--ind-x', current.offsetLeft + 'px');
+    ind.style.setProperty('--ind-w', current.offsetWidth + 'px');
+    ind.classList.add('on');
+  };
+  const spy = () => {
+    const atEnd = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+    let sec = atEnd ? sections.at(-1) : null;
+    if (!sec) for (const s of sections) if (s.getBoundingClientRect().top <= innerHeight * .4) sec = s;
+    const hit = sec ? linkFor(sec.id) : null;
+    if (hit === current) return;
+    current?.removeAttribute('aria-current');
+    hit?.setAttribute('aria-current', 'location');
+    current = hit; moveInd();
+  };
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => { ticking = false; header.classList.toggle('scrolled', scrollY > 8); spy(); });
+  };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  /* The capsule changes width as it tightens, so re-measure once that settles */
+  header.addEventListener('transitionend', e => { if (e.target === header && e.propertyName === 'width') moveInd(); });
+  addEventListener('resize', moveInd);
+  document.fonts?.ready.then(moveInd);
 
-  /* Mobile nav */
-  const toggle = $('.nav-toggle'), nav = $('#nav');
+  /* Mobile nav: a glass sheet under the capsule. Closes on a link, Escape or a tap outside. */
+  const toggle = $('.nav-toggle');
   const setNav = open => {
     nav.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', open);
@@ -50,7 +79,10 @@
   };
   toggle.addEventListener('click', () => setNav(!nav.classList.contains('open')));
   $$('a', nav).forEach(a => a.addEventListener('click', () => setNav(false)));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') setNav(false); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && nav.classList.contains('open')) { setNav(false); toggle.focus(); }
+  });
+  document.addEventListener('click', e => { if (nav.classList.contains('open') && !header.contains(e.target)) setNav(false); });
 
   /* ── Get a quote: services and their questions ──
      type: one = pick one, many = pick any, text = short answer, long = a few lines.
@@ -292,6 +324,33 @@
     }
     document.addEventListener('visibilitychange', () => { offscreen.tab = document.hidden; sync(); });
     show(0);
+  }
+
+  /* Hero → demo: as the page scrolls, the hero text drifts slower than the page and fades, while the demo
+     stage opens from a card to the full screen width (--p 0 → 1). It then holds, pinned, for a short stretch
+     before the page moves on. It pins centred when it fits below the header, otherwise bottom-aligned. */
+  const pin = $('.stage-pin'), stage = $('.hero-stage'), heroText = $('.hero > .wrap');
+  if (pin && stage && !reduceMotion) {
+    root.classList.add('js-stage');
+    let range = 1, queued = false;
+    const expand = () => {
+      queued = false;
+      const p = Math.min(1, Math.max(0, scrollY / range));
+      stage.style.setProperty('--p', p.toFixed(4));
+      heroText.style.transform = `translateY(${Math.min(scrollY, range) * .3}px) scale(${1 - p * .05})`;
+      heroText.style.opacity = Math.max(0, 1 - p * 1.15).toFixed(3);
+    };
+    const measure = () => {
+      const h = stage.offsetHeight, room = innerHeight - 72;
+      const pinTop = h <= room ? 72 + (room - h) / 2 : innerHeight - h;
+      stage.style.setProperty('--pin-top', pinTop + 'px');
+      range = Math.max(200, pin.getBoundingClientRect().top + scrollY - pinTop);
+      expand();
+    };
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(expand); } }, { passive: true });
+    addEventListener('resize', measure);
+    document.fonts?.ready.then(measure);
+    measure();
   }
 
   /* Subtle reveal on scroll */
