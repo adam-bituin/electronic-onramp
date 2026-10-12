@@ -9,7 +9,6 @@
   const BOOKING_URL = '';
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-  const root = document.documentElement;
   /* The Arabic page loads assets/l10n/ar.js first, which sets window.EOR_L10N; English is the fallback. */
   const L10N = window.EOR_L10N || {};
   const UI = Object.assign({
@@ -30,20 +29,6 @@
   const onScroll = () => header.classList.toggle('scrolled', scrollY > 8);
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
-  /* Light / dark: the inline head script set data-theme (light unless the visitor chose dark before). */
-  const themeBtn = $('.theme-toggle'), themeMeta = $('meta[name="theme-color"]');
-  const applyTheme = t => {
-    root.dataset.theme = t;
-    themeBtn.setAttribute('aria-label', t === 'dark' ? themeBtn.dataset.toLight : themeBtn.dataset.toDark);
-    themeMeta.content = t === 'dark' ? '#06111F' : '#FFFFFF';
-  };
-  applyTheme(root.dataset.theme === 'dark' ? 'dark' : 'light');
-  themeBtn.addEventListener('click', () => {
-    const t = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    applyTheme(t);
-    try { localStorage.setItem('eor-theme', t); } catch (e) {}
-  });
-
   /* Mobile nav */
   const toggle = $('.nav-toggle'), nav = $('#nav');
   const setNav = open => {
@@ -58,15 +43,51 @@
   /* ── Get a quote: services and their questions ──
      type: one = pick one, many = pick any, text = short answer, long = a few lines.
      Service ids match the data-pick links on the service cards. */
-  const GROUPS = L10N.groups || ['IT support', 'Infrastructure', 'Cloud & security', 'Software & digital'];
-  const [SUPPORT, INFRA, CLOUD, SOFT] = GROUPS;
+  const GROUPS = L10N.groups || ['Software solutions', 'IT support', 'Infrastructure', 'Cloud & security'];
+  const [SOFT, SUPPORT, INFRA, CLOUD] = GROUPS;
   const SERVICES = L10N.services || [
+    { id: 'acct', group: SOFT, name: 'Accounting, ERP, inventory & POS', qs: [
+      { q: 'Which platform?', type: 'one', opts: ['QuickBooks Online', 'QuickBooks Desktop', 'Sage 50', 'Sage 200 Evolution', 'Sage Business Cloud', 'Not sure, advise us'] },
+      { q: 'What do you need?', type: 'many', opts: ['New licences', 'Implementation and setup', 'Data migration', 'Inventory', 'Point of sale', 'Training', 'Support and upgrades'] },
+      { q: 'Number of users', type: 'text' },
+      { q: 'Current system, if any', type: 'text', ph: 'For example: Excel, Tally, Odoo' } ] },
+    { id: 'payroll', group: SOFT, name: 'HR & payroll', qs: [
+      { q: 'Number of employees', type: 'one', opts: ['Under 25', '25 to 100', '100 to 500', 'More than 500'] },
+      { q: 'What do you need?', type: 'many', opts: ['Payroll', 'Leave management', 'Attendance', 'Employee records', 'End of service calculations'] },
+      { q: 'Current system, if any', type: 'text', ph: 'Optional' } ] },
+    { id: 'crm', group: SOFT, name: 'CRM', qs: [
+      { q: 'What should it manage?', type: 'many', opts: ['Leads and sales pipeline', 'Customer service', 'Marketing', 'Quotes and invoices'] },
+      { q: 'Number of users', type: 'text' },
+      { q: 'Connect it to your accounting software?', type: 'one', opts: ['Yes', 'No', 'Not sure'] } ] },
+    { id: 'industry', group: SOFT, name: 'Facility, school & IP management', qs: [
+      { q: 'Which system?', type: 'many', opts: ['Facility management (QuickFMS)', 'School management', 'Intellectual property management'] },
+      { q: 'Size of your organisation', type: 'text', ph: 'Sites, students, staff or cases' },
+      { q: 'Anything specific?', type: 'long', ph: 'Optional' } ] },
+    { id: 'zatca', group: SOFT, name: 'E-invoicing (ZATCA)', qs: [
+      { q: 'Where do you invoice?', type: 'one', opts: ['Saudi Arabia only', 'Saudi Arabia and other GCC countries', 'Not sure'] },
+      { q: 'Your accounting system', type: 'text', ph: 'For example: Sage, QuickBooks, Excel' },
+      { q: 'Invoices per month, roughly', type: 'one', opts: ['Under 100', '100 to 1,000', 'Over 1,000'] } ] },
+    { id: 'reports', group: SOFT, name: 'Crystal Reports & BI', qs: [
+      { q: 'What do you need?', type: 'many', opts: ['New Crystal Reports', 'Change existing reports', 'Dashboards', 'Scheduled report emails'] },
+      { q: 'Where does the data come from?', type: 'text', ph: 'For example: Sage, SQL Server, Excel' } ] },
+    { id: 'dbc', group: SOFT, name: 'Digital business cards', qs: [
+      { q: 'How many cards?', type: 'one', opts: ['1 to 10', '11 to 50', 'More than 50'] },
+      { q: 'Features', type: 'many', opts: ['QR code', 'NFC card', 'Save to contacts', 'Company branding'] } ] },
+    { id: 'software', group: SOFT, name: 'Custom application development', qs: [
+      { q: 'What should it do?', type: 'long', ph: 'Describe the task or process in a sentence or two' },
+      { q: 'Who will use it?', type: 'one', opts: ['Our team', 'Our customers', 'Both'] },
+      { q: 'Tools it should connect to', type: 'many', opts: ['Excel or Sheets', 'Microsoft 365', 'Accounting software', 'A CRM', 'WhatsApp'] } ] },
+    { id: 'web', group: SOFT, name: 'Websites & e-commerce', qs: [
+      { q: 'What do you need?', type: 'one', opts: ['New website', 'Website redesign', 'Online store', 'Mobile app', 'Web app or portal'] },
+      { q: 'Main goal', type: 'many', opts: ['Show the business', 'Get enquiries', 'Sell online', 'Take bookings'] },
+      { q: 'Languages', type: 'one', opts: ['English', 'Arabic', 'Both'] },
+      { q: 'Current website', type: 'text', ph: 'Optional' } ] },
     { id: 'support', group: SUPPORT, name: 'Managed IT & helpdesk', qs: [
       { q: 'How many computers and laptops?', type: 'one', opts: ['Under 10', '10 to 50', '50 to 200', 'More than 200'] },
       { q: 'How is IT handled today?', type: 'one', opts: ['Nobody, we manage ourselves', 'In-house IT person', 'Another provider', 'Mix of these'] },
       { q: 'What do you need covered?', type: 'many', opts: ['Helpdesk for staff', 'Monitoring', 'Updates and patching', 'New starter setups', 'Printers'] },
       { q: 'Support hours needed', type: 'one', opts: ['Working hours', 'Extended hours', '24/7'] } ] },
-    { id: 'onsite', group: SUPPORT, name: 'On-site support & AMC', qs: [
+    { id: 'onsite', group: SUPPORT, name: 'On-site support & annual maintenance', qs: [
       { q: 'What kind of arrangement?', type: 'one', opts: ['Annual maintenance contract', 'Visits when needed', 'A one-off job', 'Not sure yet'] },
       { q: 'Number of locations', type: 'one', opts: ['1', '2 to 3', 'More than 3'] },
       { q: 'What needs looking after?', type: 'many', opts: ['Computers', 'Printers and copiers', 'Network', 'Servers', 'CCTV', 'Phones'] },
@@ -99,25 +120,11 @@
       { q: 'What are you looking for?', type: 'one', opts: ['Move to the cloud', 'New on-site server', 'Manage existing servers', 'Not sure'] },
       { q: 'What runs on it?', type: 'many', opts: ['Files', 'Accounting or ERP', 'Databases', 'Websites or apps', 'Remote access'] },
       { q: 'Preferred cloud', type: 'one', opts: ['Microsoft Azure', 'AWS', 'Google Cloud', 'No preference'] } ] },
-    { id: 'cyber', group: CLOUD, name: 'Cybersecurity & backup', qs: [
-      { q: 'What do you need?', type: 'many', opts: ['Firewall', 'Antivirus and endpoint protection', 'Backups', 'Email security', 'Staff training', 'Security review'] },
+    { id: 'cyber', group: CLOUD, name: 'Firewall, cybersecurity & backup', qs: [
+      { q: 'What do you need?', type: 'many', opts: ['Firewall', 'Acronis Cyber Protect Cloud', 'Antivirus and endpoint protection', 'Backups', 'Email security', 'Staff training', 'Security review'] },
       { q: 'Have you had an incident recently?', type: 'one', opts: ['Yes', 'No', 'Not sure'] },
       { q: 'Do you have backups today?', type: 'one', opts: ['Yes, tested', 'Yes, never tested', 'No', 'Not sure'] },
-      { q: 'Any compliance requirements?', type: 'text', ph: 'For example: client audits, ISO 27001, PDPL' } ] },
-    { id: 'software', group: SOFT, name: 'Custom software & automation', qs: [
-      { q: 'What should it do?', type: 'long', ph: 'Describe the task or process in a sentence or two' },
-      { q: 'Who will use it?', type: 'one', opts: ['Our team', 'Our customers', 'Both'] },
-      { q: 'Tools it should connect to', type: 'many', opts: ['Excel or Sheets', 'Microsoft 365', 'Accounting software', 'A CRM', 'WhatsApp'] } ] },
-    { id: 'erp', group: SOFT, name: 'ERP & CRM', qs: [
-      { q: 'What do you need?', type: 'one', opts: ['Choose a system', 'Set up a new system', 'Fix or extend our current one', 'Connect systems together'] },
-      { q: 'Areas to cover', type: 'many', opts: ['Sales and CRM', 'Inventory', 'Accounting', 'HR and payroll', 'Purchasing'] },
-      { q: 'Current system, if any', type: 'text', ph: 'For example: Odoo, Zoho, Excel' },
-      { q: 'Number of users', type: 'text' } ] },
-    { id: 'web', group: SOFT, name: 'Websites & apps', qs: [
-      { q: 'What do you need?', type: 'one', opts: ['New website', 'Website redesign', 'Mobile app', 'Web app or portal'] },
-      { q: 'Main goal', type: 'many', opts: ['Show the business', 'Get enquiries', 'Sell online', 'Take bookings'] },
-      { q: 'Languages', type: 'one', opts: ['English', 'Arabic', 'Both'] },
-      { q: 'Current website', type: 'text', ph: 'Optional' } ] }
+      { q: 'Any compliance requirements?', type: 'text', ph: 'For example: client audits, ISO 27001, PDPL' } ] }
   ];
   const SHARED = L10N.shared || [
     { id: 'team', q: 'Team size', type: 'one', opts: ['1 to 10', '11 to 50', '51 to 200', 'More than 200'] },
@@ -240,7 +247,7 @@
   refresh();
 
   /* Subtle reveal on scroll */
-  const targets = $$('.sec-head, .svc, .step, .tile, .facts, .plan-block, .contact-tile, .faq details, .hero-visual');
+  const targets = $$('.sec-head, .svc, .sol, .step, .tile, .facts, .badges, .plan-block, .contact-tile, .faq details');
   if ('IntersectionObserver' in window && !reduceMotion) {
     targets.forEach(n => n.classList.add('reveal'));
     const io = new IntersectionObserver(entries => entries.forEach(en => {

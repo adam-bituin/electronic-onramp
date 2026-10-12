@@ -6,9 +6,11 @@ Static, bilingual (English + Arabic) one-page site. No build step: plain HTML, C
 |---|---|
 | `index.html` | English page |
 | `ar/index.html` | Arabic page (RTL) |
-| `styles.css` | All styles. Colour tokens at the top: white, navy `#0B1F3A`, orange `#F26B1D`, plus dark mode |
-| `main.js` | Theme toggle, mobile menu, scroll reveal and the **Get a quote** planner |
+| `styles.css` | All styles. Colour tokens at the top: white, dark blue `#1E3A8A`, orange `#F26B1D`. Light only |
+| `main.js` | Mobile menu, scroll reveal and the **Get a quote** planner |
 | `assets/l10n/ar.js` | Arabic strings for the planner |
+| `assets/brand/` | EOR logo (`eor-logo.png`, footer) and the E◎R mark (`eor-mark.png`, header) |
+| `assets/partners/` | Partner and platform logos for the marquee, plus the Intuit ProAdvisor and Sage Partner badges in About. Cropped from a screenshot, so swap in sharper originals when available (keep the file names) |
 
 ## Get a quote planner
 Visitors pick services, answer short questions per service, add their details, and the site opens WhatsApp with

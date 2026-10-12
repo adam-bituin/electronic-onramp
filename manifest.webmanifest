@@ -1,11 +1,11 @@
 {
   "name": "Electronic On-Ramp W.L.L.",
-  "short_name": "On-Ramp IT",
-  "description": "IT support, networks, cloud, cybersecurity and software for growing businesses.",
+  "short_name": "EOR",
+  "description": "A leading provider of next generation security technology and services.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#0B1F3A",
+  "theme_color": "#1E3A8A",
   "icons": [
     { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
